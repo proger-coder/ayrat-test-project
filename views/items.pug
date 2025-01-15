@@ -1,0 +1,45 @@
+extends layout
+
+block content
+    h1.text-center.mb-4 Список предметов
+
+    // Постоянная плашка наверху с уведомлением и кнопкой
+    .alert.alert-warning.text-center.mb-4
+        p По умолчанию, эта страница выводит только первые 100 предметов.
+        form(method="GET" action="/items")
+            input(type="hidden" name="limit" value="100000")
+            button.btn.btn-primary(type="submit") Подгрузить все
+
+    if items.length > 0
+        table.table.table-striped.table-hover
+            thead
+                tr
+                    th Имя предмета
+                    th Валюта
+                    th Рекомендуемая цена
+                    th.table-primary Мин. цена
+                    th.table-primary Мин. Tradable цена
+                    th Макс. цена
+                    th Средняя цена
+                    th Медианная цена
+                    th Количество
+                    th Ссылка на предмет
+                    th Ссылка на рынок
+            tbody
+              each item in items
+                  tr
+                      td #{item.market_hash_name}
+                      td #{item.currency}
+                      td #{item.suggested_price !== null ? item.suggested_price : '-'}
+                      td.table-primary #{item.min_price !== null ? item.min_price : '-'}
+                      td.table-primary #{item.min_tradable_price !== null ? item.min_tradable_price : '-'}
+                      td #{item.max_price !== null ? item.max_price : '-'}
+                      td #{item.mean_price !== null ? item.mean_price : '-'}
+                      td #{item.median_price !== null ? item.median_price : '-'}
+                      td #{item.quantity}
+                      td
+                          a(href=item.item_page target="_blank" class="btn btn-sm btn-primary") Посмотреть
+                      td
+                          a(href=item.market_page target="_blank" class="btn btn-sm btn-secondary") Рынок
+    else
+        p.text-center Нет доступных предметов

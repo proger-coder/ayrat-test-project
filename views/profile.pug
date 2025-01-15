@@ -1,0 +1,75 @@
+extends layout
+
+block content
+    h1.text-center Профиль пользователя #{username}
+
+    h3.text-center Баланс: #{balance} EUR
+
+    .row
+        .col-md-8
+            h2.text-center Купленные товары
+            if purchased.length > 0
+                table.table.table-striped
+                    thead
+                        tr
+                            th Имя товара
+                            th Цена
+                            th Дата покупки
+                    tbody
+                      each purchase in purchased
+                          tr
+                              td #{purchase.name}
+                              td #{purchase.price} EUR
+                              td #{new Date(purchase.purchase_date).toLocaleString()}
+            else
+                p.text-center Нет покупок.
+        //- Правая колонка: Форма смены пароля
+        .col-md-4
+            h2.text-center Смена пароля
+                //- Контейнер для уведомлений
+            div#notificationContainer
+            form(id="changePasswordForm")
+                .mb-3
+                    label(for="oldPassword" class="form-label") Текущий пароль
+                    input(type="password" name="oldPassword" id="oldPassword" class="form-control" required)
+                .mb-3
+                    label(for="newPassword" class="form-label") Новый пароль
+                    input(type="password" name="newPassword" id="newPassword" class="form-control" required)
+                button(type="submit" class="btn btn-warning w-100") Обновить пароль
+
+    script.
+        document.addEventListener("DOMContentLoaded", () => {
+          const form = document.getElementById("changePasswordForm");
+          const notificationContainer = document.getElementById("notificationContainer");
+
+          form.addEventListener("submit", async (event) => {
+            event.preventDefault(); // Остановить отправку формы
+
+            const oldPassword = form.oldPassword.value;
+            const newPassword = form.newPassword.value;
+
+            try {
+              const response = await fetch("/change-password", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({oldPassword, newPassword}),
+              });
+
+              const message = await response.text();
+              showNotification(message, response.ok ? "success" : "danger");
+            } catch (error) {
+              showNotification("Произошла ошибка. Попробуйте снова.", "danger");
+            }
+          });
+
+          function showNotification(message, type) {
+            notificationContainer.innerHTML = `
+              <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            `;
+          }
+        });

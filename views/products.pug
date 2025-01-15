@@ -1,0 +1,86 @@
+extends layout
+
+block content
+    if user
+        .text-end.mb-3
+            span Имя пользователя: #{user.username} |
+            span Баланс: #{user.balance} EUR
+
+    .row
+        //- Левая колонка: Список товаров
+        .col-md-8
+            h2.text-center Товары в продаже
+            //- Контейнер для уведомлений
+            div#notificationContainer
+
+            if products.length > 0
+                table.table.table-striped
+                    thead
+                        tr
+                            th Имя товара
+                            th Цена
+                            th Количество
+                            th Купить
+                    tbody
+                      each product in products
+                          tr
+                              td #{product.name}
+                              td #{product.price}
+                              td #{product.quantity}
+                              td
+                                  if !user
+                                      button(type="button" class="btn btn-secondary btn-sm" disabled) Авторизуйтесь
+                                  else if user.balance < product.price
+                                      button(type="button" class="btn btn-secondary btn-sm" disabled) Недостаточно средств
+                                  else
+                                      button(type="button" class="btn btn-primary btn-sm buy-button" data-product-id=`${product.id}`) Купить
+            else
+                p.text-center Нет доступных товаров.
+
+    script.
+      document.addEventListener("DOMContentLoaded", () => {
+        const notificationContainer = document.getElementById("notificationContainer");
+
+        // Обработка нажатия кнопки "Купить"
+        document.body.addEventListener("click", async (event) => {
+          if (event.target.classList.contains("buy-button")) {
+            const button = event.target;
+            const productId = button.getAttribute("data-product-id");
+
+            try {
+              // Отправка запроса на сервер
+              const response = await fetch(`/buy/${productId}`, {
+                method: "POST",
+              });
+
+              const message = await response.text();
+              const type = response.ok ? "success" : "danger";
+
+              // Показ уведомления
+              showNotification(message, type, () => {
+                // Обновление страницы после закрытия уведомления
+                window.location.reload();
+              });
+            } catch (error) {
+              showNotification("Произошла ошибка. Попробуйте снова.", "danger");
+            }
+          }
+        });
+
+        // Функция показа уведомления
+        function showNotification(message, type, onClose) {
+          notificationContainer.innerHTML = `
+              <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}<br>Для обновления страницы закройте это уведомление.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            `;
+
+          // обработчик закрытия уведомления
+          const closeButton = notificationContainer.querySelector(".btn-close");
+          closeButton.addEventListener("click", () => {
+            if (onClose) onClose();
+          });
+        }
+      });
+

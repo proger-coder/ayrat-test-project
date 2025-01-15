@@ -1,0 +1,31 @@
+{
+  "name": "ayrat-test-project",
+  "version": "1.0.0",
+  "description": "Ayrat's test project",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "dev": "ts-node src/index.ts"
+  },
+  "author": "Ayrat Sungatullin",
+  "license": "ISC",
+  "dependencies": {
+    "@types/express-session": "1.18.1",
+    "bcrypt": "5.1.1",
+    "body-parser": "1.20.3",
+    "connect-redis": "8.0.1",
+    "express": "4.21.2",
+    "express-session": "1.18.1",
+    "postgres": "3.4.5",
+    "pug": "3.0.3",
+    "redis": "4.7.0",
+    "winston": "3.17.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "5.0.2",
+    "@types/express": "5.0.0",
+    "ts-node": "10.9.2",
+    "typescript": "5.7.3"
+  }
+}

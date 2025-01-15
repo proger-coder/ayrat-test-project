@@ -1,0 +1,22 @@
+extends layout
+
+block content
+    h1.text-center Добро пожаловать на главную страницу
+
+    .container
+        .row.justify-content-center
+            .col-12
+                img#main-image(src="/images/pic.webp" alt="Главное изображение")
+
+        .row.mt-3
+            .col-12
+                h2.text-center Для навигации по сайту, используйте навигационную панель вверху
+
+    style.
+        #main-image {
+            display: block;
+            margin: 0 auto;
+            height: 66vh; /* 2/3 высоты страницы */
+            max-width: 100%; /* Сохранение пропорций */
+            object-fit: contain; /* Сохранение пропорций внутри области */
+        }
