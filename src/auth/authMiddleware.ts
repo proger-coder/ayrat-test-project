@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import {sql} from "../dbOperations/prepareDatabase";
+import {UserSession} from "../dbOperations/types";
 
 // получить юзера из базы
 async function getUserById(userId: number): Promise<boolean> {
@@ -10,7 +11,7 @@ async function getUserById(userId: number): Promise<boolean> {
 }
 
 export async function isAuthenticated(req: Request, res: Response, next: NextFunction): Promise<void> {
-  const session = req.session as { userId?: number };
+  const session = req.session as UserSession;
 
   if (!session.userId) {
     // res.status(401).send("Unauthorized");

@@ -9,6 +9,7 @@ import {changePassword, login, register} from "./auth/userController";
 import {isAuthenticated} from "./auth/authMiddleware";
 import bodyParser from "body-parser";
 import {join} from "path";
+import {Product, PurchasedProduct, User, UserSession, UserWithBalance} from "./dbOperations/types";
 
 const PORT = 3000;
 const secretKey = 'easter-egg';
@@ -51,7 +52,7 @@ async function bootstrap() {
   );
 
   app.get("/login", (req, res) => {
-    const session = req.session as { userId?: number };
+    const session = req.session as UserSession;
     if (session && session.userId) {
       return res.redirect("/profile");
     }
@@ -73,9 +74,9 @@ async function bootstrap() {
   app.get("/products", async (req, res) => {
     let user = undefined;
 
-    const session = req.session as { userId?: number };
+    const session = req.session as UserSession;
     if (session.userId) {
-      const usernameAndBalanceArray = await sql`
+      const usernameAndBalanceArray = await sql<UserWithBalance[]>`
         SELECT username, balance FROM users WHERE id = ${session.userId}
       `;
 
@@ -87,7 +88,7 @@ async function bootstrap() {
 
     try {
       // получение списка товаров из базы данных
-      const products = await sql`
+      const products = await sql<Product[]>`
       SELECT id, name, price, quantity FROM products
     `;
 
@@ -102,7 +103,7 @@ async function bootstrap() {
   });
 
   app.get("/profile", isAuthenticated, async (req, res, next) => {
-    const session = req.session as { userId?: number };
+    const session = req.session as UserSession;
 
     if (!session.userId) {
       throw new Error("User is not authenticated.");
@@ -110,7 +111,7 @@ async function bootstrap() {
 
     try {
       // получение списка покупок из БД с жойном
-      const purchased = await sql`
+      const purchased = await sql<PurchasedProduct[]>`
         SELECT 
           p.id, 
           p.name, 
@@ -126,7 +127,7 @@ async function bootstrap() {
           pu.user_id = ${session.userId}
       `;
 
-      const usernameAndBalanceArray = await sql`
+      const usernameAndBalanceArray = await sql<UserWithBalance[]>`
         SELECT username, balance FROM users WHERE id = ${session.userId}
       `;
       const {username, balance} = usernameAndBalanceArray[0];
@@ -182,7 +183,7 @@ async function bootstrap() {
   });
 
   app.post("/buy/:productId", isAuthenticated, async (req, res) => {
-    const session = req.session as { userId?: number };
+    const session = req.session as UserSession;
     if (!session.userId) {
       res.status(401).send(`Ошибка: не аутентифицирован`);
       return;
@@ -193,7 +194,7 @@ async function bootstrap() {
       const userId = session.userId;
 
       // проверка наличия товара и его количества
-      const product = await sql`
+      const product = await sql<Product[]>`
             SELECT id, name, price, quantity FROM products WHERE id = ${productId}
         `;
 
@@ -210,7 +211,7 @@ async function bootstrap() {
       }
 
       // проверка баланса юзера
-      const user = await sql`
+      const user = await sql<User[]>`
             SELECT balance FROM users WHERE id = ${userId}
         `;
 
