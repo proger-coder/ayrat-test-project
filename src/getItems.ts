@@ -24,24 +24,20 @@ export async function getItems (tradable: boolean): Promise<any[]>{
   return await response.json();
 }
 
-export async function makeDualPricedArray(){
-  const anyItems = await getItems(false);
-  const tradableItems = await getItems(true);
+export async function makeDualPricedArray() {
+  const [anyItems, tradableItems] = await Promise.all([
+    getItems(false),
+    getItems(true)
+  ]);
 
-  // преобразуем tradableItems в Map для быстрого доступа
   const tradableItemsMap = new Map(
       tradableItems.map(item => [item.market_hash_name, item])
   );
 
-  return anyItems.map(item => {
-    const tradableItem = tradableItemsMap.get(item.market_hash_name);
-
-    // ++ поле min_tradable_price
-    return {
-      ...item,
-      min_tradable_price: tradableItem ? tradableItem.min_price : null,
-    };
-  });
+  return anyItems.map(item => ({
+    ...item,
+    min_tradable_price: tradableItemsMap.get(item.market_hash_name)?.min_price || null,
+  }));
 }
 
 const oneRealItem = {
