@@ -218,7 +218,9 @@ async function bootstrap() {
       const userBalance = user[0].balance;
 
       if (userBalance < price) {
-        res.status(400).send(`Ошибка: недостаточно средств: ${userBalance}`);
+        const neededFunds = Math.round(price - userBalance);
+        const neededRounded = Number(neededFunds.toFixed(2))
+        res.status(400).send(`Ошибка: недостаточно средств. У вас ${userBalance}, не хватает ${neededRounded}`);
         return;
       }
 
